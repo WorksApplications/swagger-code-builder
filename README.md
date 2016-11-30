@@ -7,7 +7,7 @@ Swagger Code Builder is a project generator from [Swagger](http://swagger.io/) (
 
 ## Getting Started
 
-Install Coding Starter and generate `java-service` project.
+Install Code Builder and generate `java-service` project.
 
 ```bash
 gradle installDist
@@ -49,6 +49,7 @@ Install to local.
 ```bash
 gradle install
 ```
+### Server project
 
 Generate `sparkjava` project and run.
 
@@ -67,6 +68,8 @@ Open another console.
 curl "http://localhost:8080/api/1/users/test" -H "Authorization: foobar"
 ```
 
+### Serverless project
+
 You can also generate `java-awsserverless` project.
 
 ```bash
@@ -80,6 +83,8 @@ gradle buildZip
 ./register-lambda.sh
 ./register-api.sh
 ```
+
+`swagger.yaml` is including vendor prefixes for AWS API Gateway.
 
 ## Usage
 
