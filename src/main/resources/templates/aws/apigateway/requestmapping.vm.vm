@@ -1,0 +1,26 @@
+#parse ( "templates/forOperation.vm" )
+#set( $D = '$' )
+#if ( !$operation.parameters.isEmpty() )
+\#set ( $allParams = $input.params() )
+\#set ( $pathParams = $allParams.get('path') )
+\#set ( $headerParams = $allParams.get('header') )
+\#set ( $queryParams = $allParams.get('querystring') )
+#end
+{
+#foreach ( $parameter in $operation.parameters )
+#if ( $parameter.in == 'path' )
+  "${utils.case.lowerCamelCase($parameter.name)}": "${D}util.escapeJavaScript(${D}pathParams.get('$parameter.name'))"#if($foreach.hasNext),
+
+#end
+#elseif ( $parameter.in == 'header' )
+  "${utils.case.lowerCamelCase($parameter.name)}": "${D}util.escapeJavaScript(${D}headerParams.get('$parameter.name'))"#if($foreach.hasNext),#end
+
+#elseif ( $parameter.in == 'query' )
+  "${utils.case.lowerCamelCase($parameter.name)}": "${D}util.escapeJavaScript(${D}queryParams.get('$parameter.name'))"#if($foreach.hasNext),#end
+
+#elseif ( $parameter.in == 'body' )
+  "body": $input.json('$')#if($foreach.hasNext),#end
+
+#end
+#end
+}

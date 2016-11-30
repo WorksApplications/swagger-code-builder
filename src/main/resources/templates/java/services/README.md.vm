@@ -1,0 +1,17 @@
+# ${api.info.title} Services
+
+$!{api.info.description}
+
+#[[## Setup for Eclipse]]#
+
+```
+gradle eclipse
+```
+
+and import the generated project.
+
+#[[## Build Package and Install]]#
+
+```
+gradle install
+```

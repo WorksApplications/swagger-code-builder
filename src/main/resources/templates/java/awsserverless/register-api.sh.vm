@@ -1,0 +1,22 @@
+#set( $D = '$' )
+#[[#!/bin/bash]]#
+
+AWS_ACCOUNT_ID="${option.awsAccountId}"
+AWS_REGION="${option.awsRegion}"
+
+IMPORT_RESPONSE=$(aws apigateway import-rest-api --body 'file://swagger.yaml' --region ${D}{AWS_REGION})
+IMPORT_RESPONSE_STATUS=$?
+
+if [ ${D}IMPORT_RESPONSE_STATUS -eq 0 ]; then
+    echo "API Registered"
+    API_ID=${D}(echo ${D}IMPORT_RESPONSE | jq -r '.id')
+
+#foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
+    aws lambda add-permission \
+        --function-name "${utils.AWS.asMethodName($pathOperation)}" \
+        --statement-id "${D}(uuidgen)" \
+        --action "lambda:InvokeFunction" \
+        --principal "apigateway.amazonaws.com" \
+        --source-arn "arn:aws:execute-api:${D}{AWS_REGION}:${D}{AWS_ACCOUNT_ID}:${D}{API_ID}/*/${utils.AWS.asResourceName($pathOperation)}"
+#end
+fi

@@ -1,0 +1,20 @@
+#set ( $packageName = $shortcut.packageName($api) )
+#parse ( "templates/forOperation.vm" )
+#set ( $methodName = $params.methodName )
+#set ( $successResponse = $operation.responses.get('200') )
+package ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()};
+
+import lombok.Builder;
+import lombok.Value;
+
+@Value
+@Builder
+public class ${methodName}Response {
+#foreach ( $headerEntry in $successResponse.headers.entrySet() )
+    private String ${utils.case.lowerCamelCase($headerEntry.key)};
+#end
+#if ( $successResponse.schema )
+#set ( $responseBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($successResponse.schema, $api.definitions, $methodName.concat('ResponseBody')))} )
+    private ${responseBodyModelClassName} body;
+#end
+}

@@ -1,0 +1,23 @@
+#set ( $packageName = $shortcut.packageName($api) )
+#parse ( "templates/forOperation.vm" )
+#set ( $methodName = $params.methodName )
+#set ( $successResponse = $operation.responses.get('200') )
+package ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()};
+
+import lombok.Data;
+
+@Data
+public class ${methodName}Request {
+#foreach ( $parameter in $operation.parameters )
+#if ( $parameter.in == 'path' )
+    private String ${utils.case.lowerCamelCase($parameter.name)};
+#elseif ( $parameter.in == 'header' )
+    private String ${utils.case.lowerCamelCase($parameter.name)};
+#elseif ( $parameter.in == 'query' )
+    private String ${utils.case.lowerCamelCase($parameter.name)};
+#elseif ( $parameter.in == 'body' )
+#set ( $requestBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($parameter.schema, $api.definitions, $methodName.concat('RequestBody')))} )
+    private ${requestBodyModelClassName} body;
+#end
+#end
+}

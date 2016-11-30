@@ -1,0 +1,22 @@
+#set ( $artifactId = ${utils.case.chainCase(${api.info.title})} )
+# ${api.info.title} Server for On-premise
+
+$!{api.info.description}
+
+```
+gradle installDist
+./build/install/${artifactId}/bin/${artifactId}
+```
+#[[## Setup for Eclipse]]#
+
+```
+gradle eclipse
+```
+
+and import the generated project.
+
+#[[## Build Package and Install]]#
+
+```
+gradle distZip
+```

@@ -1,0 +1,41 @@
+package ${option.javaGroupId}.${shortcut.packageName($api)}.route;
+
+import com.google.gson.Gson;
+import com.worksap.webapi.exception.ApiException;
+import lombok.extern.slf4j.Slf4j;
+import spark.ExceptionHandler;
+import spark.Request;
+import spark.Response;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ * Convert ApiException to HTTP response
+ */
+@Slf4j
+@Singleton
+public class ApiExceptionHandler implements ExceptionHandler {
+
+    private Gson gson;
+
+    @Inject
+    public ApiExceptionHandler(Gson gson) {
+        this.gson = gson;
+    }
+
+    @Override
+    public void handle(Exception exception, Request request, Response response) {
+        if (!(exception instanceof ApiException)) {
+            throw new IllegalArgumentException();
+        }
+        ApiException apiException = (ApiException) exception;
+        log.info("API Exception handled: {}", apiException.getMessage());
+
+        Error error = Error.builder()
+                .message(apiException.getMessage())
+                .build();
+        response.body(gson.toJson(error));
+        response.status(apiException.getStatusCode());
+    }
+}

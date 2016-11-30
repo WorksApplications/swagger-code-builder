@@ -1,0 +1,43 @@
+package ${option.javaGroupId}.${shortcut.packageName($api)};
+
+import com.amazonaws.regions.Regions;
+import lombok.Data;
+import org.kohsuke.args4j.Option;
+
+/**
+ * Option for on-premises mode
+ */
+@Data
+public class ServerOption {
+
+    @Option(name = "-h", aliases = "--help", usage = "Print usage message and exit")
+    private boolean help;
+
+    @Option(name = "--port", usage = "Port number [default: 8080]")
+    private int portNumber = 8080;
+
+    @Option(name = "--session-public-key", usage = "Public key for RSA based JWT session")
+    private String sessionPublicKey;
+
+    /* JDBC */
+
+    @Option(name = "--jdbc-url")
+    private String jdbcUrl;
+    @Option(name = "--jdbc-username", depends = {"--jdbc-url"})
+    private String jdbcUsername;
+    @Option(name = "--jdbc-password", depends = {"--jdbc-url"})
+    private String jdbcPassword;
+
+    /* Dynamo DB */
+
+    private Regions dynamodbRegion;
+
+    @Option(name = "--dynamodb-region", usage = "Dynamo DB region name", forbids = {"--dynamodb-endpoint"})
+    public void setDynamodbRegion(String regionName) {
+        this.dynamodbRegion = Regions.fromName(regionName);
+    }
+
+    @Option(name = "--dynamodb-endpoint", usage = "Dynamo DB endpoint", forbids = {"--dynamodb-region"})
+    private String dynamodbEndpoint;
+
+}

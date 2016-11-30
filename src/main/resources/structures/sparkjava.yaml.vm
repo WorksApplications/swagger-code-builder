@@ -1,0 +1,39 @@
+"$utils.case.chainCase(${api.info.title})-server/":
+  "src/":
+    "main/":
+      "java/":
+        "${utils.java.toPackageDirectoriesPath($option.javaGroupId)}/":
+          "${api.info.vendorExtensions.get('x-wap-package-name').toLowerCase()}/":
+            "route/":
+#foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
+#set ( $methodName = ${utils.java.asMethodName($pathOperation)} )
+              "${methodName.toLowerCase()}/":
+                "${methodName}Route.java":
+                  template: "java/sparkjava/Route.java.vm"
+                  params:
+                    path: "${pathOperation.path}"
+                    method: "${pathOperation.method}"
+                    methodName: "${methodName}"
+#end
+              "ApiExceptionHandler.java":
+                template: "java/sparkjava/ApiExceptionHandler.java.vm"
+              "Error.java":
+                template: "java/sparkjava/Error.java.vm"
+            "Main.java":
+              template: "java/sparkjava/Main.java.vm"
+            "ServerOption.java":
+              template: "java/sparkjava/ServerOption.java.vm"
+            "${utils.case.upperCamelCase($shortcut.packageName($api))}Module.java":
+              template: "java/sparkjava/Module.java.vm"
+    "test/":
+      "java/":
+        "${utils.java.toPackageDirectoriesPath($option.javaGroupId)}/":
+          "${api.info.vendorExtensions.get('x-wap-package-name').toLowerCase()}/":
+  "README.md":
+    template: "java/sparkjava/README.md.vm"
+  ".gitignore":
+    template: "java/gitignore.vm"
+  "build.gradle":
+    template: "java/sparkjava/build.gradle.vm"
+  "settings.gradle":
+    template: "java/sparkjava/settings.gradle.vm"

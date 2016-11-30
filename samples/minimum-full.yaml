@@ -1,0 +1,31 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Minimum API
+  description: Sample API
+  x-wap-package-name: minimum
+paths:
+  /users/{userId}:
+    get:
+      parameters:
+        - name: Authorization
+          in: header
+          type: string
+        - name: userId
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          headers:
+            ETag:
+              type: string
+          schema:
+            type: object
+            properties:
+              userId:
+                type: string
+              role:
+                type: string

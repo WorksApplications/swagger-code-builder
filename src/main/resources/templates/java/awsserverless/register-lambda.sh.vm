@@ -1,0 +1,35 @@
+#set( $D = '$' )
+#set ( $packageName = $shortcut.packageName($api) )
+#[[#!/bin/bash]]#
+
+AWS_ACCOUNT_ID="${option.awsAccountId}"
+API_VERSION="${api.info.version}"
+
+function _register {
+    ARTIFACT_NAME=${D}1
+    QUALIFIED_CLASS=${D}2
+    FUNCTION_NAME=${D}3
+    JAR_FILE_PATH="./${D}{ARTIFACT_NAME}/build/distributions/${D}{ARTIFACT_NAME}-${D}{API_VERSION}.zip"
+
+    aws lambda get-function --function-name ${D}FUNCTION_NAME > /dev/null 2>&1
+    GET_FUNCTION_RESPONSE_STATUS=${D}?
+    if [ ${D}GET_FUNCTION_RESPONSE_STATUS -ne 0 ]; then
+        aws lambda create-function \
+            --region ap-northeast-1 \
+            --function-name ${D}FUNCTION_NAME \
+            --zip-file fileb://${D}{JAR_FILE_PATH} \
+            --role "arn:aws:iam::${D}{AWS_ACCOUNT_ID}:role/lambda_basic_execution" \
+            --runtime java8 \
+            --handler "${QUALIFIED_CLASS}::handle"
+    else
+        echo "Function is already exist. uploading file..."
+        aws lambda update-function-code \
+            --function-name ${D}{FUNCTION_NAME} \
+            --zip-file fileb://${D}{JAR_FILE_PATH}
+    fi
+}
+
+#foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
+#set ( $methodName = ${utils.AWS.asMethodName($pathOperation)} )
+_register "${utils.case.chainCase($methodName)}-awslambda" "${option.javaGroupId}.${packageName}.lambda.${methodName.toLowerCase()}.${methodName}Lambda" "${methodName}"
+#end

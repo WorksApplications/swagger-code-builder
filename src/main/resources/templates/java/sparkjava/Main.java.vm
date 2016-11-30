@@ -1,0 +1,94 @@
+#set ( $packageName = $shortcut.packageName($api) )
+package ${option.javaGroupId}.${packageName};
+
+import com.google.common.net.MediaType;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.worksap.webapi.exception.ApiException;
+import lombok.extern.slf4j.Slf4j;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
+import ${option.javaGroupId}.${packageName}.route.ApiExceptionHandler;
+import ${option.javaGroupId}.${packageName}.route.Error;
+
+#foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
+#set ( $methodName = $utils.java.asMethodName($pathOperation) )
+import ${option.javaGroupId}.${packageName}.route.${methodName.toLowerCase()}.${methodName}Route;
+#end
+
+import static spark.Spark.*;
+
+/**
+ * Main class for on-premises mode
+ */
+@Slf4j
+public class Main {
+
+    private final static String JSON_TYPE = MediaType.JSON_UTF_8.withoutParameters().toString();
+
+    private static final String API_VERSION = "${utils.parseVersion(${api.info.version}).major}";
+    private static final String API_PREFIX = "/api/" + API_VERSION;
+
+    static {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+    }
+
+    public static void main(String[] args) {
+        ServerOption serverOption = parseServerOption(args);
+        if (serverOption == null) return;
+
+        port(serverOption.getPortNumber());
+        before(((request, response) -> response.type(JSON_TYPE)));
+
+        Injector injector = Guice.createInjector(new ${utils.case.upperCamelCase($shortcut.packageName($api))}Module(serverOption));
+
+        Gson gson = injector.getInstance(Gson.class);
+
+#foreach ( $pathEntry in $api.paths.entrySet() )
+#if ( $pathEntry.value.post )
+        post(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asPostMethodName($pathEntry.key, $pathEntry.value)}Route.class));
+#end
+#if ( $pathEntry.value.put )
+        put(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asPutMethodName($pathEntry.key, $pathEntry.value)}Route.class));
+#end
+#if ( $pathEntry.value.get )
+        get(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asGetMethodName($pathEntry.key, $pathEntry.value)}Route.class));
+#end
+#if ( $pathEntry.value.delete )
+        delete(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asDeleteMethodName($pathEntry.key, $pathEntry.value)}Route.class));
+#end
+#end
+
+        exception(ApiException.class, injector.getInstance(ApiExceptionHandler.class));
+        exception(JsonSyntaxException.class, (exception, request, response) -> {
+            response.body(gson.toJson(Error.builder().message(exception.getMessage()).build()));
+            response.status(400);
+        });
+        exception(Exception.class, (exception, request, response) -> {
+            log.error("Internal Server Error: ", exception);
+            throw new RuntimeException(exception);
+        });
+    }
+
+    private static ServerOption parseServerOption(String[] args) {
+        ServerOption serverOption = new ServerOption();
+        CmdLineParser parser = new CmdLineParser(serverOption);
+        try {
+            parser.parseArgument(args);
+            if (serverOption.isHelp()) {
+                parser.printUsage(System.out);
+                return null;
+            }
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            parser.printUsage(System.err);
+            return null;
+        }
+        return serverOption;
+    }
+}

@@ -1,0 +1,13 @@
+package ${option.javaGroupId}.${shortcut.packageName($api)}.route;
+
+import lombok.Builder;
+import lombok.Value;
+
+/**
+ * TODO: Write Javadoc
+ */
+@Value
+@Builder
+public class Error {
+    private String message;
+}

@@ -1,0 +1,27 @@
+## Normalize by parameters for operations.
+##
+## example at structure:
+##
+## ```
+## #set ( $methodName = ${utils.java.asMethodName($pathOperation)} )
+##   SomeFile.txt:
+##     template: SomeTemplate.vm
+##     params:
+##       path: "${pathOperation.path}"
+##       method: "${pathOperation.method}"
+## ```
+##
+## Then, you can extract pathItem and its operation by this file in `SomeTemplate.vm`.
+#set ( $pathItem = $api.paths.get($params.path) )
+#if ( $params.method == 'POST' )
+    #set ( $operation = $pathItem.post )
+#end
+#if ( $params.method == 'PUT' )
+    #set ( $operation = $pathItem.put )
+#end
+#if ( $params.method == 'GET' )
+    #set ( $operation = $pathItem.get )
+#end
+#if ( $params.method == 'DELETE' )
+    #set ( $operation = $pathEntry.delete )
+#end

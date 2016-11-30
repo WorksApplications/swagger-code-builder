@@ -1,0 +1,43 @@
+"${utils.case.chainCase($api.info.title)}-awsserverless/":
+#foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
+#set ( $methodName = $utils.java.asMethodName($pathOperation) )
+#set ( $operation = $pathOperation.operation )
+#set ( $successResponse = $operation.responses.get('200') )
+  "${utils.case.chainCase($methodName)}-awslambda/":
+    "src/":
+      "main/":
+        "java/":
+          "${utils.java.toPackageDirectoriesPath($option.javaGroupId)}/":
+            "${api.info.vendorExtensions.get('x-wap-package-name').toLowerCase()}/":
+              "lambda/":
+                "${methodName.toLowerCase()}/":
+                  "${methodName}Lambda.java":
+                    template: "java/awsserverless/Lambda.java.vm"
+                    params:
+                      path: "${pathOperation.path}"
+                      method: "${pathOperation.method}"
+                      methodName: "${methodName}"
+        "resources/":
+          "log4j.properties":
+            template: "java/awsserverless/log4j.properties.vm"
+    "build.gradle":
+      template: "java/awsserverless/sub-build.gradle.vm"
+      params:
+        methodName: "${methodName}"
+#end
+  "README.md":
+    template: "java/awsserverless/README.md.vm"
+  ".gitignore":
+    template: "java/gitignore.vm"
+  "build.gradle":
+    template: "java/awsserverless/build.gradle.vm"
+  "settings.gradle":
+    template: "java/awsserverless/settings.gradle.vm"
+  "swagger.yaml":
+    type: "swagger-api-gateway"
+  "register-api.sh":
+    template: "java/awsserverless/register-api.sh.vm"
+    permission: "rwxr-xr-x"
+  "register-lambda.sh":
+    template: "java/awsserverless/register-lambda.sh.vm"
+    permission: "rwxr-xr-x"

@@ -1,0 +1,6 @@
+#set ( $packageName = $shortcut.packageName($api) )
+#set ( $methodName = $params.methodName )
+package ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()};
+
+public class ${params.className} {
+}

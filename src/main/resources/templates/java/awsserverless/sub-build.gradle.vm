@@ -1,0 +1,6 @@
+project(':${utils.case.chainCase($params.methodName)}-awslambda') {
+    dependencies {
+        // Service
+        compile group: '${option.javaGroupId}', name: '${utils.case.chainCase($params.methodName)}-service', version: '${api.info.version}'
+    }
+}

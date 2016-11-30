@@ -1,0 +1,54 @@
+#set( $className = ${utils.case.upperCamelCase($shortcut.packageName($api))} )
+package ${option.javaGroupId}.${shortcut.packageName($api)};
+
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.name.Names;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.PropertyUtils;
+
+import java.util.Map;
+
+@Slf4j
+public class ${className}Module implements Module {
+
+    private final ServerOption serverOption;
+
+    public ${className}Module(ServerOption serverOption) {
+        this.serverOption = serverOption;
+    }
+
+    @Override
+    public void configure(Binder binder) {
+        configureOption(binder);
+    }
+
+    private void configureOption(Binder binder) {
+        try {
+            Map<String, Object> properties = PropertyUtils.describe(serverOption);
+
+            for (Map.Entry<String, Object> property : properties.entrySet()) {
+                String key = property.getKey();
+                Object value = property.getValue();
+                if (value == null || key.equals("class")) {
+                    continue;
+                }
+
+                log.debug("{} = {}", key, value);
+                if (value instanceof String) {
+                    binder.bind(String.class).annotatedWith(Names.named(key)).toInstance((String) value);
+                } else if (value instanceof Integer) {
+                    binder.bind(Integer.class).annotatedWith(Names.named(key)).toInstance((Integer) value);
+                } else if (value instanceof Boolean) {
+                    binder.bind(Boolean.class).annotatedWith(Names.named(key)).toInstance((Boolean) value);
+                } else {
+                    log.warn("Option without binding: {} ({})", value, key);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Cannot setup options", e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+}

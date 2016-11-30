@@ -1,0 +1,28 @@
+#set ( $packageName = $shortcut.packageName($api) )
+#parse ( "templates/forOperation.vm" )
+#set ( $methodName = $params.methodName )
+#set ( $successResponse = $operation.responses.get('200') )
+package ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()};
+
+import javax.inject.Singleton;
+
+@Singleton
+public class ${methodName}Service {
+
+#if ( !$operation.parameters.isEmpty() )
+#set ( $formalArgument = ${methodName} + 'Request request')
+#else
+#set ( $formalArgument = '')
+#end
+#if ( $successResponse.headers || $successResponse.schema )
+#set ( $resultType = ${methodName} + 'Response' )
+#else
+#set ( $resultType = 'void' )
+#end
+    public ${resultType} handle(${formalArgument}) {
+#if ( $resultType != 'void' )
+        return null;
+#end
+    }
+
+}

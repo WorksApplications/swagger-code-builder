@@ -1,0 +1,74 @@
+#set ( $packageName = $shortcut.packageName($api) )
+#parse ( "templates/forOperation.vm" )
+#set ( $methodName = $params.methodName )
+#set ( $successResponse = $operation.responses.get('200') )
+package ${option.javaGroupId}.${packageName}.route.${methodName.toLowerCase()};
+
+import com.google.gson.Gson;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import spark.Route;
+import spark.Request;
+import spark.Response;
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Service;
+#if ( !$operation.parameters.isEmpty() )
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Request;
+#end
+#set ( $parameterBody = $utils.parameter.findBody($operation.parameters) )
+#if ( $parameterBody )
+#set ( $requestBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($parameterBody.schema, $api.definitions, $methodName.concat('RequestBody')))} )
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${requestBodyModelClassName};
+#end
+#if ( $successResponse.headers || $successResponse.schema )
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Response;
+#end
+
+@Singleton
+public class ${methodName}Route implements Route {
+
+    private final Gson gson;
+    private final ${methodName}Service service;
+
+    @Inject
+    public ${methodName}Route(Gson gson, ${methodName}Service service) {
+        this.gson = gson;
+        this.service = service;
+    }
+
+    @Override
+    public Object handle(Request request, Response response) throws Exception {
+#if ( !$operation.parameters.isEmpty() )
+        ${methodName}Request serviceRequest = new ${methodName}Request();
+#foreach ( $parameter in $operation.parameters )
+#if ( $parameter.in == 'path' )
+        serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.params(":${parameter.name}"));
+#elseif ( $parameter.in == 'header' )
+        serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.headers("${parameter.name}"));
+#elseif ( $parameter.in == 'query' )
+        serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.queryParams("${parameter.name}"));
+#elseif ( $parameter.in == 'body' )
+        serviceRequest.setBody(gson.fromJson(request.body(), ${requestBodyModelClassName}.class))
+#end
+#end
+#set ( $serviceParam = 'serviceRequest' )
+
+#else
+#set ( $serviceParam = '' )
+#end
+#if ( $successResponse.headers || $successResponse.schema )
+        ${methodName}Response serviceResponse = service.handle(${serviceParam});
+#foreach ( $headerEntry in $successResponse.headers.entrySet() )
+        response.header("${headerEntry.key}", serviceResponse.get${utils.case.upperCamelCase($headerEntry.key)}());
+#end
+#if ( $successResponse.schema )
+        return gson.toJson(serviceResponse.getBody());
+#else
+        return "";
+#end
+#else
+        service.handle(${serviceParam});
+        return "";
+#end
+    }
+
+}

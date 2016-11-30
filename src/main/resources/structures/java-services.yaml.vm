@@ -1,0 +1,61 @@
+"${utils.case.chainCase($api.info.title)}-services/":
+#foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
+#set ( $methodName = $utils.java.asMethodName($pathOperation) )
+#set ( $operation = $pathOperation.operation )
+#set ( $successResponse = $operation.responses.get('200') )
+  "${utils.case.chainCase($methodName)}-service/":
+    "src/":
+      "main/":
+        "java/":
+          "${utils.java.toPackageDirectoriesPath($option.javaGroupId)}/":
+            "${api.info.vendorExtensions.get('x-wap-package-name').toLowerCase()}/":
+              "service/":
+                "${methodName.toLowerCase()}/":
+                  "${methodName}Service.java":
+                    template: "java/services/Service.java.vm"
+                    params:
+                      path: "${pathOperation.path}"
+                      method: "${pathOperation.method}"
+                      methodName: "${methodName}"
+#if ( !$operation.parameters.isEmpty() )
+                  "${methodName}Request.java":
+                    template: "java/services/Request.java.vm"
+                    params:
+                      path: "${pathOperation.path}"
+                      method: "${pathOperation.method}"
+                      methodName: "${methodName}"
+#set ( $parameterBody = $utils.parameter.findBody($operation.parameters) )
+#if ( $parameterBody )
+#set ( $requestBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($parameterBody.schema, $api.definitions, $methodName.concat('RequestBody')))} )
+                  "${requestBodyModelClassName}.java":
+                    template: "java/services/RequestBody.java.vm"
+                    params:
+                      methodName: "${methodName}"
+                      className: ${requestBodyModelClassName}
+#end
+#end
+#if ( $successResponse.headers || $successResponse.schema )
+                  "${methodName}Response.java":
+                    template: "java/services/Response.java.vm"
+                    params:
+                      path: "${pathOperation.path}"
+                      method: "${pathOperation.method}"
+                      methodName: "${methodName}"
+#if ( $successResponse.schema )
+#set ( $responseBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($successResponse.schema, $api.definitions, $methodName.concat('ResponseBody')))} )
+                  "${responseBodyModelClassName}.java":
+                    template: "java/services/ResponseBody.java.vm"
+                    params:
+                      methodName: "${methodName}"
+                      className: ${responseBodyModelClassName}
+#end
+#end
+#end
+  "README.md":
+    template: "java/services/README.md.vm"
+  ".gitignore":
+    template: "java/gitignore.vm"
+  "build.gradle":
+    template: "java/services/build.gradle.vm"
+  "settings.gradle":
+    template: "java/services/settings.gradle.vm"

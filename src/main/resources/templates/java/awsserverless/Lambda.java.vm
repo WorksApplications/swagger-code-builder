@@ -1,0 +1,48 @@
+#set ( $packageName = $shortcut.packageName($api) )
+#parse ( "templates/forOperation.vm" )
+#set ( $methodName = $params.methodName )
+#set ( $successResponse = $operation.responses.get('200') )
+package ${option.javaGroupId}.${packageName}.lambda.${methodName.toLowerCase()};
+
+import com.amazonaws.services.lambda.runtime.Context;
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Service;
+#if ( !$operation.parameters.isEmpty() )
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Request;
+#else
+import java.util.Map;
+#end
+#if ( $successResponse.headers || $successResponse.schema )
+import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Response;
+#end
+
+public class ${methodName}Lambda {
+
+    private ${methodName}Service service;
+
+    public ${methodName}Lambda() {
+        this.service = new ${methodName}Service();
+    }
+
+#if ( !$operation.parameters.isEmpty() )
+#set ( $formalArgument = ${methodName} + 'Request request')
+#else
+#set ( $formalArgument = 'String request')
+#end
+#if ( $successResponse.headers || $successResponse.schema )
+#set ( $resultType = ${methodName} + 'Response' )
+#else
+#set ( $resultType = 'void' )
+#end
+    public $resultType handle(${formalArgument}, Context context) {
+#if ( !$operation.parameters.isEmpty() && $resultType != 'void' )
+        return service.handle(request);
+#elseif ( !$operation.parameters.isEmpty() )
+        service.handle(request);
+#elseif ( $resultType != 'void' )
+        return service.handle();
+#else
+        service.handle();
+#end
+    }
+
+}
