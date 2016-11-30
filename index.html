@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Swagger-code-builder by WorksApplications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Swagger-code-builder</h1>
+      <h2 class="project-tagline">A project generator from Swagger specification</h2>
+      <a href="https://github.com/WorksApplications/swagger-code-builder" class="btn">View on GitHub</a>
+      <a href="https://github.com/WorksApplications/swagger-code-builder/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/WorksApplications/swagger-code-builder/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="swagger-code-builder" class="anchor" href="#swagger-code-builder" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Swagger Code Builder</h1>
+
+<p>Swagger Code Builder is a project generator from <a href="http://swagger.io/">Swagger</a> (or <a href="https://www.openapis.org/">Open API</a>).</p>
+
+<h2>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<p>Install Code Builder and generate <code>java-service</code> project.</p>
+
+<div class="highlight highlight-source-shell"><pre>gradle installDist
+gradle :api-exceptions:install
+mkdir out
+./build/install/swagger-code-builder/bin/swagger-code-builder \
+    --structure java-services \
+    --api-spec-path samples/minimum-full.yaml</pre></div>
+
+<p>Implement <code>FindUserService</code>.</p>
+
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">cd</span> out/minimum-api-services
+gradle eclipse <span class="pl-c"># or idea</span></pre></div>
+
+<p>Import the project and open <code>FindUserService</code>.</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">@Slf4j</span>
+<span class="pl-k">@Singleton</span>
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">FindUserService</span> {
+    <span class="pl-k">public</span> <span class="pl-smi">FindUserResponse</span> <span class="pl-en">handle</span>(<span class="pl-smi">FindUserRequest</span> <span class="pl-v">request</span>) {
+        log<span class="pl-k">.</span>debug(<span class="pl-s"><span class="pl-pds">"</span>request = {}<span class="pl-pds">"</span></span>, request);
+        <span class="pl-k">return</span> <span class="pl-smi">FindUserResponse</span><span class="pl-k">.</span>builder()
+                .eTag(<span class="pl-s"><span class="pl-pds">"</span>aaaaa<span class="pl-pds">"</span></span>)
+                .body(<span class="pl-smi">FindUserResponseBody</span><span class="pl-k">.</span>builder()
+                        .userId(request<span class="pl-k">.</span>getUserId())
+                        .role(<span class="pl-s"><span class="pl-pds">"</span>ROLE<span class="pl-pds">"</span></span>)
+                        .build())
+                .build();
+    }
+}</pre></div>
+
+<p>Install to local.</p>
+
+<div class="highlight highlight-source-shell"><pre>gradle install</pre></div>
+
+<h3>
+<a id="server-project" class="anchor" href="#server-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Server project</h3>
+
+<p>Generate <code>sparkjava</code> project and run.</p>
+
+<div class="highlight highlight-source-shell"><pre>./build/install/swagger-code-builder/bin/swagger-code-builder \
+    --structure sparkjava \
+    --api-spec-path samples/minimum-full.yaml
+<span class="pl-c1">cd</span> out/minimum-api-server
+gradle run</pre></div>
+
+<p>Already you can call the API.
+Open another console.</p>
+
+<div class="highlight highlight-source-shell"><pre>curl <span class="pl-s"><span class="pl-pds">"</span>http://localhost:8080/api/1/users/test<span class="pl-pds">"</span></span> -H <span class="pl-s"><span class="pl-pds">"</span>Authorization: foobar<span class="pl-pds">"</span></span></pre></div>
+
+<h3>
+<a id="serverless-project" class="anchor" href="#serverless-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Serverless project</h3>
+
+<p>You can also generate <code>java-awsserverless</code> project.</p>
+
+<div class="highlight highlight-source-shell"><pre>./build/install/swagger-code-builder/bin/swagger-code-builder \
+    --structure java-awsserverless \
+    --api-spec-path samples/minimum-full.yaml \
+    --aws-region ap-northeast-1 \
+    --aws-account-id 123456789012 <span class="pl-c"># Your AWS account ID</span>
+<span class="pl-c1">cd</span> out/minimum-api-awsserverless
+gradle buildZip
+./register-lambda.sh
+./register-api.sh</pre></div>
+
+<p><code>swagger.yaml</code> is including vendor prefixes for AWS API Gateway.</p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre lang="text"><code> --api-spec-path VAL : File path for Open API (Swagger) file
+ --output-path VAL   : Output directory (default: out)
+ --structure VAL     : Project structure
+ -h (--help)         : Print usage message and exit (default: true)
+</code></pre>
+
+<h3>
+<a id="avaiable-structures" class="anchor" href="#avaiable-structures" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Avaiable Structures</h3>
+
+<dl>
+  <dt>java-services</dt>
+  <dd>POJO business logic classes</dd>
+  <dt>sparkjava</dt>
+  <dd>Application server based on sparkjava which invoke POJO services</dd>
+  <dt>java-awsserverless</dt>
+  <dd>AWS Lambdas which invoke POJO services</dd>
+</dl>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>Swagger Code Builder by Works Applications Co.,Ltd. is licensed under
+the Apache License, Version 2.0.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/WorksApplications/swagger-code-builder">Swagger-code-builder</a> is maintained by <a href="https://github.com/WorksApplications">WorksApplications</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
