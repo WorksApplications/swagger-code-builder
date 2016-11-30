@@ -29,7 +29,7 @@ dependencies {
     compile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
 
     // Services
-    compile group: 'com.worksap.webapi', name: 'api-exceptions', version: '1.0-SNAPSHOT'
+    compile group: 'com.worksap.webapi', name: 'api-exceptions', version: '1.0'
 #foreach ( $pathOperation in $utils.toPathOperation($api.paths) )
 #set ( $methodName = $utils.java.asMethodName($pathOperation) )
     compile group: '${option.javaGroupId}', name: '${utils.case.chainCase($methodName)}-service', version: '${api.info.version}'
