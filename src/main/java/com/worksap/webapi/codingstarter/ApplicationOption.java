@@ -24,7 +24,7 @@ import org.kohsuke.args4j.Option;
  */
 @Data
 public class ApplicationOption {
-    @Option(name = "-h", aliases = "--help", usage = "Print usage message and exit")
+    @Option(name = "-h", aliases = "--help", usage = "Print usage message and exit", help = true)
     private boolean help = false;
 
     @Option(name = "--structure", usage = "Project structure", required = true)
@@ -36,12 +36,12 @@ public class ApplicationOption {
     @Option(name = "--output-path", usage = "Output directory")
     private String outputPath = "out";
 
-    @Option(name = "--java-group-id")
+    @Option(name = "--java-group-id", usage = "Group ID of the artifact for Java project")
     private String javaGroupId = "com.worksap.webapi";
 
-    @Option(name = "--aws-region")
+    @Option(name = "--aws-region", usage = "AWS region to deploy")
     private String awsRegion = "ap-northeast-1";
 
-    @Option(name = "--aws-account-id")
+    @Option(name = "--aws-account-id", usage = "AWS account ID to deploy")
     private String awsAccountId;
 }

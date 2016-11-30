@@ -81,6 +81,8 @@ public class Main {
         try {
             parser.parseArgument(args);
             if (applicationOption.isHelp()) {
+                parser.printSingleLineUsage(System.out); System.out.println();
+                System.out.println();
                 parser.printUsage(System.out);
                 return null;
             }

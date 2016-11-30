@@ -89,10 +89,14 @@ gradle buildZip
 ## Usage
 
 ```text
- --api-spec-path VAL : File path for Open API (Swagger) file
- --output-path VAL   : Output directory (default: out)
- --structure VAL     : Project structure
- -h (--help)         : Print usage message and exit (default: true)
+ --api-spec-path VAL  : File path for Open API (Swagger) file
+ --aws-account-id VAL : AWS account ID to deploy
+ --aws-region VAL     : AWS region to deploy (default: ap-northeast-1)
+ --java-group-id VAL  : Group ID of the artifact for Java project (default:
+                        com.worksap.webapi)
+ --output-path VAL    : Output directory (default: out)
+ --structure VAL      : Project structure
+ -h (--help)          : Print usage message and exit
 ```
 
 ### Avaiable Structures
