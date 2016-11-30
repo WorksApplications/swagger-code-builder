@@ -7,7 +7,7 @@ Swagger Code Builder is a project generator from [Swagger](http://swagger.io/) (
 
 ## Getting Started
 
-1. install Coding Starter and generate `java-service` project.
+Install Coding Starter and generate `java-service` project.
 
 ```bash
 gradle installDist
@@ -18,7 +18,7 @@ mkdir out
     --api-spec-path samples/minimum-full.yaml
 ```
 
-2. Implement `FindUserService`
+Implement `FindUserService`.
 
 ```bash
 cd out/minimum-api-services
@@ -50,7 +50,7 @@ Install to local.
 gradle install
 ```
 
-3. Generate `sparkjava` project and run.
+Generate `sparkjava` project and run.
 
 ```bash
 ./build/install/swagger-code-builder/bin/swagger-code-builder \
@@ -67,7 +67,7 @@ Open another console.
 curl "http://localhost:8080/api/1/users/test" -H "Authorization: foobar"
 ```
 
-4. You can also generate `java-awsserverless` project.
+You can also generate `java-awsserverless` project.
 
 ```bash
 ./build/install/swagger-code-builder/bin/swagger-code-builder \
