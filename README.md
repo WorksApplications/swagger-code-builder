@@ -13,7 +13,7 @@ Swagger Code Builder is a project generator from [Swagger](http://swagger.io/) (
 gradle installDist
 gradle :api-exceptions:install
 mkdir out
-./build/install/open-api-coding-starter/bin/open-api-coding-starter \
+./build/install/swagger-code-builder/bin/swagger-code-builder \
     --structure java-services \
     --api-spec-path samples/minimum-full.yaml
 ```
@@ -53,7 +53,7 @@ gradle install
 3. Generate `sparkjava` project and run.
 
 ```bash
-./build/install/open-api-coding-starter/bin/open-api-coding-starter \
+./build/install/swagger-code-builder/bin/swagger-code-builder \
     --structure sparkjava \
     --api-spec-path samples/minimum-full.yaml
 cd out/minimum-api-server
@@ -70,7 +70,7 @@ curl "http://localhost:8080/api/1/users/test" -H "Authorization: foobar"
 4. You can also generate `java-awsserverless` project.
 
 ```bash
-./build/install/open-api-coding-starter/bin/open-api-coding-starter \
+./build/install/swagger-code-builder/bin/swagger-code-builder \
     --structure java-awsserverless \
     --api-spec-path samples/minimum-full.yaml \
     --aws-region ap-northeast-1 \
