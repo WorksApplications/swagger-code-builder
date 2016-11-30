@@ -1,5 +1,8 @@
 # Swagger Code Builder
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://travis-ci.org/WorksApplications/swagger-code-builder.svg?branch=master)](https://travis-ci.org/WorksApplications/swagger-code-builder)
+
 Swagger Code Builder is a project generator from [Swagger](http://swagger.io/) (or [Open API](https://www.openapis.org/)).
 
 ## Getting Started
