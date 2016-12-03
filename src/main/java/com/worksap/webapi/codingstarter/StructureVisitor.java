@@ -56,6 +56,7 @@ public class StructureVisitor {
         visitChild(rootDirPath, node);
     }
 
+    @SuppressWarnings("unchecked")
     private void visitChild(Path parentDirPath, Map<String, Object> node) throws IOException {
         if (node == null) return;
         for (Map.Entry<String, Object> entry : node.entrySet()) {

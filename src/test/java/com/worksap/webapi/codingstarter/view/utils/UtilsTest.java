@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
  */
 public class UtilsTest {
 
-    Utils utils = new Utils();
+    private Utils utils = new Utils();
 
     @Test
     public void parseVersion_Major() throws Exception {

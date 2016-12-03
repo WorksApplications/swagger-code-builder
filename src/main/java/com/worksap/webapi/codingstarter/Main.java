@@ -65,6 +65,7 @@ public class Main {
         visitor.visit(loadStructure(applicationOption, ve, context));
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, Object> loadStructure(ApplicationOption applicationOption, VelocityEngine ve, VelocityContext context) {
         Template template = ve.getTemplate("/structures/" + applicationOption.getStructure() + ".yaml.vm");
         StringWriter writer = new StringWriter();

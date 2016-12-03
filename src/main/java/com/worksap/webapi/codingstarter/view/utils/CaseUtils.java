@@ -18,13 +18,10 @@ package com.worksap.webapi.codingstarter.view.utils;
 
 import org.jboss.dna.common.text.Inflector;
 
-import java.util.regex.Pattern;
-
 /**
  * TODO: Write Javadoc
  */
 public class CaseUtils {
-    private static Pattern WORD_SPLIT_PATTERN = Pattern.compile("[^a-zA-Z]");
 
     public String pluralize(Object word) {
         return inflector.pluralize(word);

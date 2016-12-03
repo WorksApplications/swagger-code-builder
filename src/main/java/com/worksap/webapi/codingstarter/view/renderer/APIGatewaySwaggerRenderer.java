@@ -57,12 +57,14 @@ public class APIGatewaySwaggerRenderer {
         addIntegration();
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> loadApiSpec(String apiSpecPath) throws IOException {
         try (InputStream stream = new BufferedInputStream(new FileInputStream(new File(apiSpecPath)))) {
             return (Map<String, Object>) yaml.load(stream);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addIntegration() throws ReflectiveOperationException, IOException {
         for (Map.Entry<String, Object> pathEntry : ((Map<String, Object>) apiSpec.get("paths")).entrySet()) {
             String path = pathEntry.getKey();
@@ -90,6 +92,7 @@ public class APIGatewaySwaggerRenderer {
         throw new IllegalArgumentException();
     }
 
+    @SuppressWarnings("unchecked")
     private void addIntegration(String functionName, Map<String, Object> operation, String path, String method) throws IOException {
         Map<String, String> requestTemplates = Collections.singletonMap("application/json", renderRequestMappingTemplate(path, method));
 
@@ -117,6 +120,7 @@ public class APIGatewaySwaggerRenderer {
         operation.put("x-amazon-apigateway-integration", integration);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> createSuccessResponse(String httpStatusCode, Map<String, Object> apiResponse, String path, String method) throws IOException {
         Map<String, Object> awsResponse = new HashMap<>();
         awsResponse.put("responseTemplates", Collections.singletonMap("application/json", "$input.json('$.body')"));
