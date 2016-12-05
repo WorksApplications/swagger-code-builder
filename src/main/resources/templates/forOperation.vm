@@ -19,6 +19,9 @@
 #if ( $params.method == 'PUT' )
     #set ( $operation = $pathItem.put )
 #end
+#if ( $params.method == 'PATCH' )
+    #set ( $operation = $pathItem.patch )
+#end
 #if ( $params.method == 'GET' )
     #set ( $operation = $pathItem.get )
 #end

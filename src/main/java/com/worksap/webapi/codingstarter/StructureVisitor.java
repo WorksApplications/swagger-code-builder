@@ -47,7 +47,7 @@ public class StructureVisitor {
         this.apiGatewaySwaggerRenderer = apiGatewaySwaggerRenderer;
     }
 
-    public void visit(Map<String, Object> node) throws IOException {
+    public void visit(Map<String, Object> node) throws Exception {
         Path rootDirPath = Paths.get(outputPath);
         if (!Files.isDirectory(rootDirPath)) {
             throw new IOException("Output directory does not exist");
@@ -57,7 +57,7 @@ public class StructureVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    private void visitChild(Path parentDirPath, Map<String, Object> node) throws IOException {
+    private void visitChild(Path parentDirPath, Map<String, Object> node) throws Exception {
         if (node == null) return;
         for (Map.Entry<String, Object> entry : node.entrySet()) {
             String filename = entry.getKey();

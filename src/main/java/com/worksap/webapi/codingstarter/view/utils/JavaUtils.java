@@ -36,6 +36,8 @@ public class JavaUtils {
             return asPostMethodName(pathOperation.getPath(), pathOperation.getOperation());
         case "PUT":
             return asPutMethodName(pathOperation.getPath(), pathOperation.getOperation());
+        case "PATCH":
+            return asPatchMethodName(pathOperation.getPath(), pathOperation.getOperation());
         case "GET":
             return asGetMethodName(pathOperation.getPath(), pathOperation.getOperation());
         case "DELETE":
@@ -66,8 +68,8 @@ public class JavaUtils {
     public String asPutMethodName(String path, Path pathItem) {
         return asPutMethodName(path, pathItem.getPut());
     }
-    public String asPutMethodName(String path, Operation getOperation) {
-        return asPutMethodName(path, getOperation.getOperationId());
+    public String asPutMethodName(String path, Operation putOperation) {
+        return asPutMethodName(path, putOperation.getOperationId());
     }
     public String asPutMethodName(String path, String operationId) {
         if (operationId != null) {
@@ -79,6 +81,24 @@ public class JavaUtils {
         }
 
         return appendEntityWords(path, new StringBuilder("Update")).toString();
+    }
+
+    public String asPatchMethodName(String path, Path pathItem) {
+        return asPutMethodName(path, pathItem.getPatch());
+    }
+    public String asPatchMethodName(String path, Operation patchOperation) {
+        return asPutMethodName(path, patchOperation.getOperationId());
+    }
+    public String asPatchMethodName(String path, String operationId) {
+        if (operationId != null) {
+            return caseUtils.upperCamelCase(operationId);
+        }
+
+        if ("/".equals(path)) {
+            return "PatchRoot";
+        }
+
+        return appendEntityWords(path, new StringBuilder("Patch")).toString();
     }
 
     public String asGetMethodName(String path, Path pathItem) {
