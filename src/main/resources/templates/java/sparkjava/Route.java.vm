@@ -43,7 +43,12 @@ public class ${methodName}Route implements Route {
 #if ( $parameter.in == 'path' )
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.params(":${parameter.name}"));
 #elseif ( $parameter.in == 'header' )
+#if ( $parameter.name == 'X-Forwarded-For' )
+        serviceRequest.setSourceIp(getSourceIp(request));
+#set ( $useSourceIp = true )
+#else
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.headers("${parameter.name}"));
+#end
 #elseif ( $parameter.in == 'query' )
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.queryParams("${parameter.name}"));
 #elseif ( $parameter.in == 'body' )
@@ -70,5 +75,15 @@ public class ${methodName}Route implements Route {
         return "";
 #end
     }
+
+#if ( $useSourceIp )
+    private String getSourceIp(Request request) {
+        String address = request.headers("X-Forwarded-For");
+        if (address != null) {
+            return address;
+        }
+        return request.ip();
+    }
+#end
 
 }

@@ -12,6 +12,9 @@ paths:
         - name: Authorization
           in: header
           type: string
+        - name: X-Forwarded-For
+          in: header
+          type: string
         - name: userId
           in: path
           type: string
