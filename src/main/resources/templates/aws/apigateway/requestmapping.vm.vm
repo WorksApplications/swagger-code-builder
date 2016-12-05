@@ -13,7 +13,11 @@
 
 #end
 #elseif ( $parameter.in == 'header' )
-  "${utils.case.lowerCamelCase($parameter.name)}": "${D}util.escapeJavaScript(${D}headerParams.get('$parameter.name'))"#if($foreach.hasNext),#end
+#if ( $parameter.name == 'X-Forwarded-For' )
+  "sourceIp": "$context.identity.sourceIp"
+#else
+  "${utils.case.lowerCamelCase($parameter.name)}": "${D}util.escapeJavaScript(${D}headerParams.get('$parameter.name'))"
+#end#if($foreach.hasNext),#end
 
 #elseif ( $parameter.in == 'query' )
   "${utils.case.lowerCamelCase($parameter.name)}": "${D}util.escapeJavaScript(${D}queryParams.get('$parameter.name'))"#if($foreach.hasNext),#end

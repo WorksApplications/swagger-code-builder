@@ -12,7 +12,11 @@ public class ${methodName}Request {
 #if ( $parameter.in == 'path' )
     private String ${utils.case.lowerCamelCase($parameter.name)};
 #elseif ( $parameter.in == 'header' )
+#if ( $parameter.name == 'X-Forwarded-For' )
+    private String sourceIp;
+#else
     private String ${utils.case.lowerCamelCase($parameter.name)};
+#end
 #elseif ( $parameter.in == 'query' )
     private String ${utils.case.lowerCamelCase($parameter.name)};
 #elseif ( $parameter.in == 'body' )
