@@ -56,6 +56,9 @@ public class Main {
 #if ( $pathEntry.value.put )
         put(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asPutMethodName($pathEntry.key, $pathEntry.value)}Route.class));
 #end
+#if ( $pathEntry.value.patch )
+        patch(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asPatchMethodName($pathEntry.key, $pathEntry.value)}Route.class));
+#end
 #if ( $pathEntry.value.get )
         get(API_PREFIX + "${pathEntry.key.replaceAll('\{(\S+)}', ':$1')}", JSON_TYPE, injector.getInstance(${utils.java.asGetMethodName($pathEntry.key, $pathEntry.value)}Route.class));
 #end

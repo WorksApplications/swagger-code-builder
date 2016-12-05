@@ -38,10 +38,12 @@ public class APIGatewaySwaggerRenderer {
     private Yaml yaml;
     private final String awsRegion;
     private final String awsAccountId;
-    private final Map<String, Object> apiSpec;
+    private final String apiSpecPath;
     private final VelocityEngine velocityEngine;
     private final VelocityContext velocityContext;
     private final Utils utils;
+
+    private Map<String, Object> apiSpec;
 
     public APIGatewaySwaggerRenderer(ApplicationOption option, VelocityEngine velocityEngine, VelocityContext velocityContext, Utils utils) throws IOException, ReflectiveOperationException {
         DumperOptions options = new DumperOptions();
@@ -49,23 +51,21 @@ public class APIGatewaySwaggerRenderer {
         this.yaml = new Yaml(options);
         this.awsRegion = option.getAwsRegion();
         this.awsAccountId = option.getAwsAccountId();
-        this.apiSpec = loadApiSpec(option.getApiSpecPath());
+        this.apiSpecPath = option.getApiSpecPath();
         this.velocityEngine = velocityEngine;
         this.velocityContext = velocityContext;
         this.utils = utils;
-
-        addIntegration();
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> loadApiSpec(String apiSpecPath) throws IOException {
+    private Map<String, Object> loadApiSpec(String apiSpecPath) throws IOException, ReflectiveOperationException {
         try (InputStream stream = new BufferedInputStream(new FileInputStream(new File(apiSpecPath)))) {
-            return (Map<String, Object>) yaml.load(stream);
+            return addIntegration((Map<String, Object>) yaml.load(stream));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void addIntegration() throws ReflectiveOperationException, IOException {
+    private Map<String, Object> addIntegration(Map<String, Object> apiSpec) throws ReflectiveOperationException, IOException {
         for (Map.Entry<String, Object> pathEntry : ((Map<String, Object>) apiSpec.get("paths")).entrySet()) {
             String path = pathEntry.getKey();
             Map<String, Object> operations = (Map<String, Object>) pathEntry.getValue();
@@ -76,6 +76,7 @@ public class APIGatewaySwaggerRenderer {
                 addIntegration(functionName, operation, path, method);
             }
         }
+        return apiSpec;
     }
 
     private String toFunctionName(String method, String path, String operationId) {
@@ -84,6 +85,8 @@ public class APIGatewaySwaggerRenderer {
                 return utils.getAWS().asPostMethodName(path, operationId);
             case "PUT":
                 return utils.getAWS().asPutMethodName(path, operationId);
+            case "PATCH":
+                return utils.getAWS().asPatchMethodName(path, operationId);
             case "GET":
                 return utils.getAWS().asGetMethodName(path, operationId);
             case "DELETE":
@@ -159,7 +162,11 @@ public class APIGatewaySwaggerRenderer {
         }
     }
 
-    public void writeFile(Path newFilePath) throws IOException {
+    public void writeFile(Path newFilePath) throws IOException, ReflectiveOperationException {
+        if (apiSpec == null) {
+            apiSpec = loadApiSpec(apiSpecPath);
+        }
+
         try (Writer writer = Files.newBufferedWriter(newFilePath)) {
             writer.append(yaml.dump(apiSpec));
         }

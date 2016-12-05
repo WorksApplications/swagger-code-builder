@@ -18,7 +18,8 @@ package com.worksap.webapi.codingstarter.view.utils;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * TODO: Write Javadoc

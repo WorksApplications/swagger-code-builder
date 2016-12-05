@@ -94,6 +94,11 @@ public class Utils {
                 result.add(putOperation);
             }
 
+            PathOperation patchOperation = toPathOperation(path, pathItem.getPatch(), "PATCH");
+            if (patchOperation != null) {
+                result.add(patchOperation);
+            }
+
             PathOperation getOperation = toPathOperation(path, pathItem.getGet(), "GET");
             if (getOperation != null) {
                 result.add(getOperation);

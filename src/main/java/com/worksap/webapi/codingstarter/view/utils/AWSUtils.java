@@ -35,6 +35,8 @@ public class AWSUtils {
                 return asPostMethodName(pathOperation.getPath(), pathOperation.getOperation());
             case "PUT":
                 return asPutMethodName(pathOperation.getPath(), pathOperation.getOperation());
+            case "PATCH":
+                return asPatchMethodName(pathOperation.getPath(), pathOperation.getOperation());
             case "GET":
                 return asGetMethodName(pathOperation.getPath(), pathOperation.getOperation());
             case "DELETE":
@@ -58,8 +60,8 @@ public class AWSUtils {
         return appendEntityWords(path, new StringBuilder("Create")).toString();
     }
 
-    public String asPutMethodName(String path, Operation postOperation) {
-        return asPutMethodName(path, postOperation.getOperationId());
+    public String asPutMethodName(String path, Operation putOperation) {
+        return asPutMethodName(path, putOperation.getOperationId());
     }
     public String asPutMethodName(String path, String operationId) {
         if (operationId != null) {
@@ -73,8 +75,23 @@ public class AWSUtils {
         return appendEntityWords(path, new StringBuilder("Update")).toString();
     }
 
-    public String asGetMethodName(String path, Operation postOperation) {
-        return asGetMethodName(path, postOperation.getOperationId());
+    public String asPatchMethodName(String path, Operation patchOperation) {
+        return asPatchMethodName(path, patchOperation.getOperationId());
+    }
+    public String asPatchMethodName(String path, String operationId) {
+        if (operationId != null) {
+            return caseUtils.upperCamelCase(operationId);
+        }
+
+        if ("/".equals(path)) {
+            return "PatchRoot";
+        }
+
+        return appendEntityWords(path, new StringBuilder("Patch")).toString();
+    }
+
+    public String asGetMethodName(String path, Operation getOperation) {
+        return asGetMethodName(path, getOperation.getOperationId());
     }
     public String asGetMethodName(String path, String operationId) {
         if (operationId != null) {
@@ -92,8 +109,8 @@ public class AWSUtils {
         }
     }
 
-    public String asDeleteMethodName(String path, Operation postOperation) {
-        return asDeleteMethodName(path, postOperation.getOperationId());
+    public String asDeleteMethodName(String path, Operation deleteOperation) {
+        return asDeleteMethodName(path, deleteOperation.getOperationId());
     }
     public String asDeleteMethodName(String path, String operationId) {
         if (operationId != null) {

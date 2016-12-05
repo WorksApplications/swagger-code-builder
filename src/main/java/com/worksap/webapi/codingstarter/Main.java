@@ -18,8 +18,8 @@ package com.worksap.webapi.codingstarter;
 
 import com.worksap.webapi.codingstarter.view.renderer.APIGatewaySwaggerRenderer;
 import com.worksap.webapi.codingstarter.view.renderer.VelocityTemplateRenderer;
-import com.worksap.webapi.codingstarter.view.utils.Utils;
 import com.worksap.webapi.codingstarter.view.utils.Shortcut;
+import com.worksap.webapi.codingstarter.view.utils.Utils;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import lombok.extern.slf4j.Slf4j;
