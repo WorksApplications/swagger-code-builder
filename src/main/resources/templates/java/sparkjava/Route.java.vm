@@ -14,6 +14,7 @@ import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.
 #if ( !$operation.parameters.isEmpty() )
 import ${option.javaGroupId}.${packageName}.service.${methodName.toLowerCase()}.${methodName}Request;
 #end
+#set ( $parameterBody = false )
 #set ( $parameterBody = $utils.parameter.findBody($operation.parameters) )
 #if ( $parameterBody )
 #set ( $requestBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($parameterBody.schema, $api.definitions, $methodName.concat('RequestBody')))} )
@@ -67,7 +68,7 @@ public class ${methodName}Route implements Route {
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.queryMap("${parameter.name}").${type.toLowerCase()}Value());
 #end
 #elseif ( $parameter.in == 'body' )
-        serviceRequest.setBody(gson.fromJson(request.body(), ${requestBodyModelClassName}.class))
+        serviceRequest.setBody(gson.fromJson(request.body(), ${requestBodyModelClassName}.class));
 #end
 #end
 #set ( $serviceParam = 'serviceRequest' )
