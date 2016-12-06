@@ -157,4 +157,25 @@ public class JavaUtils {
         if (packageName == null) return null;
         return packageName.replace('.', '/');
     }
+
+    public String toType(String type, String format) {
+        if (type == null) return "String";
+        switch (type) {
+            case "integer":
+                if ("int64".equals(format)) {
+                    return "Long";
+                }
+                return "Integer";
+            case "number":
+                if ("float".equals(format)) {
+                    return "Float";
+                }
+                return "Double";
+            case "boolean":
+                return "Boolean";
+            case "object":
+                return "Object";
+        }
+        return "String";
+    }
 }
