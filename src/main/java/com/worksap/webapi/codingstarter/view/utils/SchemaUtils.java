@@ -19,6 +19,7 @@ package com.worksap.webapi.codingstarter.view.utils;
 import io.swagger.models.Model;
 import io.swagger.models.RefModel;
 import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 
 import java.util.Map;
 
@@ -44,8 +45,8 @@ public class SchemaUtils {
 
         if (definitions != null && schema instanceof RefModel) {
             String simpleRef = ((RefModel) schema).getSimpleRef();
-            Model resolveModel = definitions.get(simpleRef);
 
+            Model resolveModel = definitions.get(simpleRef);
             String resolveTitle = resolveModel.getTitle();
             if (resolveTitle != null) {
                 return resolveTitle;
@@ -55,5 +56,9 @@ public class SchemaUtils {
         }
 
         return defaultName;
+    }
+
+    public String resolveName(RefProperty schema, Map<String, Model> definitions, String defaultName) {
+        return schema.getSimpleRef();
     }
 }
