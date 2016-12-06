@@ -26,5 +26,5 @@
     #set ( $operation = $pathItem.get )
 #end
 #if ( $params.method == 'DELETE' )
-    #set ( $operation = $pathEntry.delete )
+    #set ( $operation = $pathItem.delete )
 #end
