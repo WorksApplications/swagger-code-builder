@@ -124,7 +124,7 @@ public class JavaUtils {
     }
 
     public String asDeleteMethodName(String path, Path pathItem) {
-        return asDeleteMethodName(path, pathItem.getGet());
+        return asDeleteMethodName(path, pathItem.getDelete());
     }
     public String asDeleteMethodName(String path, Operation deleteOperation) {
         return asDeleteMethodName(path, deleteOperation.getOperationId());
