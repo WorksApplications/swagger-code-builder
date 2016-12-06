@@ -41,16 +41,31 @@ public class ${methodName}Route implements Route {
         ${methodName}Request serviceRequest = new ${methodName}Request();
 #foreach ( $parameter in $operation.parameters )
 #if ( $parameter.in == 'path' )
+#set ( $type = ${utils.java.toType($parameter.type, $parameter.format)} )
+#if ( $type == 'String' )
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.params(":${parameter.name}"));
+#else
+        serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(${type}.valueOf(request.params(":${parameter.name}")));
+#end
 #elseif ( $parameter.in == 'header' )
 #if ( $parameter.name == 'X-Forwarded-For' )
         serviceRequest.setSourceIp(getSourceIp(request));
 #set ( $useSourceIp = true )
 #else
+#set ( $type = ${utils.java.toType($parameter.type, $parameter.format)} )
+#if ( $type == 'String' )
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.headers("${parameter.name}"));
+#else
+        serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(${type}.valueOf(request.headers("${parameter.name}")));
+#end
 #end
 #elseif ( $parameter.in == 'query' )
+#set ( $type = ${utils.java.toType($parameter.type, $parameter.format)} )
+#if ( $type == 'String' )
         serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.queryParams("${parameter.name}"));
+#else
+        serviceRequest.set${utils.case.upperCamelCase($parameter.name)}(request.queryMap("${parameter.name}").${type.toLowerCase()}Value());
+#end
 #elseif ( $parameter.in == 'body' )
         serviceRequest.setBody(gson.fromJson(request.body(), ${requestBodyModelClassName}.class))
 #end

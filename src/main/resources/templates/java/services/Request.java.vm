@@ -10,15 +10,15 @@ import lombok.Data;
 public class ${methodName}Request {
 #foreach ( $parameter in $operation.parameters )
 #if ( $parameter.in == 'path' )
-    private String ${utils.case.lowerCamelCase($parameter.name)};
+    private ${utils.java.toType($parameter.type, $parameter.format)} ${utils.case.lowerCamelCase($parameter.name)};
 #elseif ( $parameter.in == 'header' )
 #if ( $parameter.name == 'X-Forwarded-For' )
     private String sourceIp;
 #else
-    private String ${utils.case.lowerCamelCase($parameter.name)};
+    private ${utils.java.toType($parameter.type, $parameter.format)} ${utils.case.lowerCamelCase($parameter.name)};
 #end
 #elseif ( $parameter.in == 'query' )
-    private String ${utils.case.lowerCamelCase($parameter.name)};
+    private ${utils.java.toType($parameter.type, $parameter.format)} ${utils.case.lowerCamelCase($parameter.name)};
 #elseif ( $parameter.in == 'body' )
 #set ( $requestBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($parameter.schema, $api.definitions, $methodName.concat('RequestBody')))} )
     private ${requestBodyModelClassName} body;

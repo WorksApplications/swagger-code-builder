@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import spark.ExceptionHandler;
 
 import ${option.javaGroupId}.${packageName}.route.ApiExceptionHandler;
 import ${option.javaGroupId}.${packageName}.route.Error;
@@ -68,10 +69,12 @@ public class Main {
 #end
 
         exception(ApiException.class, injector.getInstance(ApiExceptionHandler.class));
-        exception(JsonSyntaxException.class, (exception, request, response) -> {
-            response.body(gson.toJson(Error.builder().message(exception.getMessage()).build()));
+        ExceptionHandler badRequestHandler = (exception, request, response) -> {
+            response.body(gson.toJson(Error.builder().message("400: " + exception.getMessage()).build()));
             response.status(400);
-        });
+        };
+        exception(JsonSyntaxException.class, badRequestHandler);
+        exception(IllegalArgumentException.class, badRequestHandler);
         exception(Exception.class, (exception, request, response) -> {
             log.error("Internal Server Error: ", exception);
             throw new RuntimeException(exception);
