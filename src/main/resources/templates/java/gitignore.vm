@@ -1,9 +1,9 @@
-/.gradle/
-/.idea/
-/.settings/
-/build/
-/bin/
-/out/
+.gradle/
+.idea/
+.settings/
+build/
+bin/
+out/
 *.iml
 *.ipr
 *.iws
