@@ -101,5 +101,4 @@ public class ${methodName}Route implements Route {
         return request.ip();
     }
 #end
-
 }
