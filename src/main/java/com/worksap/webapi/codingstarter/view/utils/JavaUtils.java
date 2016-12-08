@@ -84,7 +84,7 @@ public class JavaUtils {
     }
 
     public String asPatchMethodName(String path, Path pathItem) {
-        return asPutMethodName(path, pathItem.getPatch());
+        return asPatchMethodName(path, pathItem.getPatch());
     }
     public String asPatchMethodName(String path, Operation patchOperation) {
         return asPatchMethodName(path, patchOperation.getOperationId());
