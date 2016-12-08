@@ -30,15 +30,16 @@ import java.nio.file.Path;
  */
 public class VelocityTemplateRenderer {
     private final VelocityEngine velocityEngine;
-    private final VelocityContext velocityContext;
+    private final VelocityContext originalVelocityContext;
 
     public VelocityTemplateRenderer(VelocityEngine velocityEngine, VelocityContext velocityContext) {
         this.velocityEngine = velocityEngine;
-        this.velocityContext = velocityContext;
+        this.originalVelocityContext = velocityContext;
     }
 
     public void writeFile(Path newFilePath, String templateName, Object params) throws IOException {
         Template template = velocityEngine.getTemplate(templateName);
+        VelocityContext velocityContext = (VelocityContext) originalVelocityContext.clone();
 
         if (params != null) {
             velocityContext.put("params", params);

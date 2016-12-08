@@ -40,7 +40,7 @@ public class APIGatewaySwaggerRenderer {
     private final String awsAccountId;
     private final String apiSpecPath;
     private final VelocityEngine velocityEngine;
-    private final VelocityContext velocityContext;
+    private final VelocityContext originalVelocityContext;
     private final Utils utils;
 
     private Map<String, Object> apiSpec;
@@ -53,7 +53,7 @@ public class APIGatewaySwaggerRenderer {
         this.awsAccountId = option.getAwsAccountId();
         this.apiSpecPath = option.getApiSpecPath();
         this.velocityEngine = velocityEngine;
-        this.velocityContext = velocityContext;
+        this.originalVelocityContext = velocityContext;
         this.utils = utils;
     }
 
@@ -151,6 +151,7 @@ public class APIGatewaySwaggerRenderer {
     }
 
     private String renderMappingTemplate(String path, String method, String templateName) throws IOException {
+        VelocityContext velocityContext = (VelocityContext) originalVelocityContext.clone();
         Template template = velocityEngine.getTemplate(templateName);
         try (StringWriter writer = new StringWriter()) {
             Map<String, String> params = new HashMap<>();

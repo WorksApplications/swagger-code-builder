@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.kohsuke.args4j.CmdLineException;
@@ -69,7 +70,7 @@ public class Main {
     private static Map<String, Object> loadStructure(ApplicationOption applicationOption, VelocityEngine ve, VelocityContext context) {
         Template template = ve.getTemplate("/structures/" + applicationOption.getStructure() + ".yaml.vm");
         StringWriter writer = new StringWriter();
-        template.merge(context, writer);
+        template.merge((Context) context.clone(), writer);
 
         String yamlDocument = writer.toString();
         log.debug("Output tree:\n{}", yamlDocument);
