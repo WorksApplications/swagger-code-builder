@@ -40,7 +40,6 @@ dependencies {
     compile group: 'com.zaxxer', name: 'HikariCP', version: '2.4.7'
     compile group: 'com.h2database', name: 'h2', version: '1.4.192'
     compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '1.4.6'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.14'
 
     // Logging
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
