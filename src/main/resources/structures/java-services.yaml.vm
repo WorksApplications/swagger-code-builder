@@ -24,6 +24,7 @@
                       path: "${pathOperation.path}"
                       method: "${pathOperation.method}"
                       methodName: "${methodName}"
+#set ( $parameterBody = false )
 #set ( $parameterBody = $utils.parameter.findBody($operation.parameters) )
 #if ( $parameterBody )
 #set ( $requestBodyModelClassName = ${utils.case.upperCamelCase($utils.schema.resolveName($parameterBody.schema, $api.definitions, $methodName.concat('RequestBody')))} )
