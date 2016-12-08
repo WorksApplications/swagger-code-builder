@@ -1,6 +1,5 @@
 package ${option.javaGroupId}.${shortcut.packageName($api)};
 
-import com.amazonaws.regions.Regions;
 import lombok.Data;
 import org.kohsuke.args4j.Option;
 
@@ -27,17 +26,5 @@ public class ServerOption {
     private String jdbcUsername;
     @Option(name = "--jdbc-password", depends = {"--jdbc-url"})
     private String jdbcPassword;
-
-    /* Dynamo DB */
-
-    private Regions dynamodbRegion;
-
-    @Option(name = "--dynamodb-region", usage = "Dynamo DB region name", forbids = {"--dynamodb-endpoint"})
-    public void setDynamodbRegion(String regionName) {
-        this.dynamodbRegion = Regions.fromName(regionName);
-    }
-
-    @Option(name = "--dynamodb-endpoint", usage = "Dynamo DB endpoint", forbids = {"--dynamodb-region"})
-    private String dynamodbEndpoint;
 
 }
