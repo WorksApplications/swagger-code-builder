@@ -64,12 +64,12 @@ public class APIGatewaySwaggerRenderer {
     @SuppressWarnings("unchecked")
     private Map<String, Object> loadApiSpec(String apiSpecPath) throws IOException, ReflectiveOperationException {
         try (InputStream stream = new BufferedInputStream(new FileInputStream(new File(apiSpecPath)))) {
-            return addIntegration((Map<String, Object>) yaml.load(stream));
+            return addExtension((Map<String, Object>) yaml.load(stream));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> addIntegration(Map<String, Object> apiSpec) throws ReflectiveOperationException, IOException {
+    private Map<String, Object> addExtension(Map<String, Object> apiSpec) throws ReflectiveOperationException, IOException {
         for (Map.Entry<String, Object> pathEntry : ((Map<String, Object>) apiSpec.get("paths")).entrySet()) {
             String path = pathEntry.getKey();
             Map<String, Object> operations = (Map<String, Object>) pathEntry.getValue();
@@ -102,17 +102,17 @@ public class APIGatewaySwaggerRenderer {
     }
 
     private Map<String, Object> generateCorsOptionsOperation() {
-        Map<String, Object> corsOptionsOperation = new HashMap<>();
+        Map<String, Object> operation = new HashMap<>();
 
-        corsOptionsOperation.put("summary", "CORS support");
+        operation.put("summary", "CORS support");
 
-        corsOptionsOperation.put("description", "Enable CORS by returning correct headers");
+        operation.put("description", "Enable CORS by returning correct headers");
 
-        corsOptionsOperation.put("consumes", Collections.singletonList("application/json"));
+        operation.put("consumes", Collections.singletonList("application/json"));
 
-        corsOptionsOperation.put("produces", Collections.singletonList("application/json"));
+        operation.put("produces", Collections.singletonList("application/json"));
 
-        corsOptionsOperation.put("tags", Collections.singletonList("CORS"));
+        operation.put("tags", Collections.singletonList("CORS"));
 
         Map<String, Object> integration = new HashMap<>();
         integration.put("type", "mock");
@@ -127,18 +127,23 @@ public class APIGatewaySwaggerRenderer {
         integrationResponse.put("responseTemplates", Collections.singletonMap("application/json", "{}"));
         integration.put("responses", Collections.singletonMap("default", integrationResponse));
 
-        corsOptionsOperation.put("x-amazon-apigateway-integration", integration);
+        operation.put("x-amazon-apigateway-integration", integration);
 
         Map<String, Object> corsOptionsResponse = new HashMap<>();
         corsOptionsResponse.put("description", "Default response for CORS method");
-        Map<String, Object> corsOptionsResponseHeaders = new HashMap<>();
-        corsOptionsResponseHeaders.put("Access-Control-Allow-Headers", Collections.singletonMap("type", "string"));
-        corsOptionsResponseHeaders.put("Access-Control-Allow-Methods", Collections.singletonMap("type", "string"));
-        corsOptionsResponseHeaders.put("Access-Control-Allow-Origin", Collections.singletonMap("type", "string"));
-        corsOptionsResponse.put("headers", corsOptionsResponseHeaders);
-        corsOptionsOperation.put("responses", Collections.singletonMap("200", corsOptionsResponse));
+        Map<String, Object> responseHeaders = new HashMap<>();
+        responseHeaders.put("Access-Control-Allow-Headers", Collections.singletonMap("type", "string"));
+        responseHeaders.put("Access-Control-Allow-Methods", Collections.singletonMap("type", "string"));
+        responseHeaders.put("Access-Control-Allow-Origin", Collections.singletonMap("type", "string"));
+        corsOptionsResponse.put("headers", responseHeaders);
+        operation.put("responses", Collections.singletonMap("200", corsOptionsResponse));
 
-        return corsOptionsOperation;
+        if (awsApiGatewayUseApiKey) {
+            Map<String, List<String>> apiKeySecurity = Collections.singletonMap("api_key", new ArrayList<>());
+            operation.put("security", Collections.singletonList(apiKeySecurity));
+        }
+
+        return operation;
     }
 
     private Map<String, String> generateApiKeyDefinition() {
@@ -179,6 +184,18 @@ public class APIGatewaySwaggerRenderer {
             } else {
                 responses.put("^" + httpStatusCode + ":.*", createErrorResponse(httpStatusCode, apiResponse));
             }
+
+            if (awsApiGatewayEnableCors) {
+                Map<String, Object> headers = (Map<String, Object>) apiResponse.get("headers");
+                if (headers == null) {
+                    headers = new HashMap<>();
+                    apiResponse.put("headers", headers);
+                }
+
+                headers.put("Access-Control-Allow-Headers", Collections.singletonMap("type", "string"));
+                headers.put("Access-Control-Allow-Methods", Collections.singletonMap("type", "string"));
+                headers.put("Access-Control-Allow-Origin", Collections.singletonMap("type", "string"));
+            }
         }
 
         Map<String, Object> integration = new HashMap<>();
@@ -207,15 +224,27 @@ public class APIGatewaySwaggerRenderer {
     @SuppressWarnings("unchecked")
     private Map<String, Object> createSuccessResponse(String httpStatusCode, Map<String, Object> apiResponse) throws IOException {
         Map<String, Object> awsResponse = new HashMap<>();
+
         awsResponse.put("responseTemplates", Collections.singletonMap("application/json", "$input.json('$.body')"));
+
+        Map<String, Object> responseParameters = new HashMap<>();
         Map<String, Object> headers = (Map<String, Object>) apiResponse.get("headers");
         if (headers != null) {
             for (Map.Entry<String, Object> headerEntry : headers.entrySet()) {
                 String headerName = headerEntry.getKey();
-                awsResponse.put("method.response.header." + headerName,
+                responseParameters.put("method.response.header." + headerName,
                         "integration.response.body" + utils.getCase().lowerCamelCase(headerName));
             }
         }
+        if (awsApiGatewayEnableCors) {
+            responseParameters.put("method.response.header.Access-Control-Allow-Headers", "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'");
+            responseParameters.put("method.response.header.Access-Control-Allow-Methods", "'*'");
+            responseParameters.put("method.response.header.Access-Control-Allow-Origin", "'*'");
+        }
+        if (!responseParameters.isEmpty()) {
+            awsResponse.put("responseParameters", responseParameters);
+        }
+
         awsResponse.put("statusCode", httpStatusCode);
         return awsResponse;
     }
@@ -224,6 +253,15 @@ public class APIGatewaySwaggerRenderer {
         Map<String, Object> awsResponse = new HashMap<>();
         awsResponse.put("responseTemplates", Collections.singletonMap("application/json", "{\"message\": \"$input.body\"}"));
         awsResponse.put("statusCode", httpStatusCode);
+
+        if (awsApiGatewayEnableCors) {
+            Map<String, Object> responseParameters = new HashMap<>();
+            responseParameters.put("method.response.header.Access-Control-Allow-Headers", "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'");
+            responseParameters.put("method.response.header.Access-Control-Allow-Methods", "'*'");
+            responseParameters.put("method.response.header.Access-Control-Allow-Origin", "'*'");
+            awsResponse.put("responseParameters", responseParameters);
+        }
+
         return awsResponse;
     }
 
