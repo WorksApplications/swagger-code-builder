@@ -30,21 +30,24 @@ public class ApplicationOption {
     @Option(name = "--structure", usage = "Project structure", required = true)
     private String structure;
 
-    @Option(name = "--api-spec-path", usage = "File path for Open API (Swagger) file", required = true)
+    @Option(name = "--api-spec-path", usage = "File path for Open API (Swagger) file", metaVar = "FILE", required = true)
     private String apiSpecPath;
 
-    @Option(name = "--output-path", usage = "Output directory")
+    @Option(name = "--output-path", usage = "Output directory", metaVar = "DIR")
     private String outputPath = "out";
 
-    @Option(name = "--java-group-id", usage = "Group ID of the artifact for Java project")
+    @Option(name = "--java-group-id", usage = "Group ID of the artifact for Java project", metaVar = "GROUP")
     private String javaGroupId = "com.worksap.webapi";
 
-    @Option(name = "--aws-region", usage = "AWS region to deploy")
+    @Option(name = "--aws-region", usage = "AWS region to deploy", metaVar = "REGION")
     private String awsRegion = "ap-northeast-1";
 
-    @Option(name = "--aws-account-id", usage = "AWS account ID to deploy")
+    @Option(name = "--aws-account-id", usage = "AWS account ID to deploy", metaVar = "ACCOUNT_ID")
     private String awsAccountId;
 
     @Option(name = "--aws-api-gateway-use-api-key", usage = "Add x-api-key to swagger file")
     private boolean awsApiGatewayUseApiKey = false;
+
+    @Option(name = "--aws-api-gateway-enable-cors", usage = "Enable CORS to swagger file")
+    private boolean awsApiGatewayEnableCors = false;
 }
