@@ -27,17 +27,24 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * TODO: Write Javadoc
  */
 public class APIGatewaySwaggerRenderer {
-    private Yaml yaml;
+    private static final Map<String, String> API_KEY_DEFINITION = new HashMap<>();
+
+    static {
+        API_KEY_DEFINITION.put("type", "apiKey");
+        API_KEY_DEFINITION.put("name", "x-api-key");
+        API_KEY_DEFINITION.put("in", "header");
+    }
+
+    private final Yaml yaml;
     private final String awsRegion;
     private final String awsAccountId;
+    private final boolean awsApiGatewayUseApiKey;
     private final String apiSpecPath;
     private final VelocityEngine velocityEngine;
     private final VelocityContext originalVelocityContext;
@@ -51,6 +58,7 @@ public class APIGatewaySwaggerRenderer {
         this.yaml = new Yaml(options);
         this.awsRegion = option.getAwsRegion();
         this.awsAccountId = option.getAwsAccountId();
+        this.awsApiGatewayUseApiKey = option.isAwsApiGatewayUseApiKey();
         this.apiSpecPath = option.getApiSpecPath();
         this.velocityEngine = velocityEngine;
         this.originalVelocityContext = velocityContext;
@@ -76,6 +84,16 @@ public class APIGatewaySwaggerRenderer {
                 addIntegration(functionName, operation, path, method);
             }
         }
+
+        if (awsApiGatewayUseApiKey) {
+            Map<String, Object> securityDefinitions = (Map<String, Object>) apiSpec.get("securityDefinitions");
+            if (securityDefinitions == null) {
+                securityDefinitions = new HashMap<>();
+                apiSpec.put("securityDefinitions", securityDefinitions);
+            }
+            securityDefinitions.put("api_key", API_KEY_DEFINITION);
+        }
+
         return apiSpec;
     }
 
@@ -105,7 +123,7 @@ public class APIGatewaySwaggerRenderer {
             Map<String, Object> apiResponse = (Map<String, Object>) responseEntry.getValue();
 
             if (httpStatusCode.startsWith("2")) {
-                responses.put("default", createSuccessResponse(httpStatusCode, apiResponse, path, method));
+                responses.put("default", createSuccessResponse(httpStatusCode, apiResponse));
             } else {
                 responses.put("^" + httpStatusCode + ":.*", createErrorResponse(httpStatusCode, apiResponse));
             }
@@ -116,15 +134,26 @@ public class APIGatewaySwaggerRenderer {
         integration.put("uri", "arn:aws:apigateway:" + awsRegion + ":lambda:path/2015-03-31/functions/arn:aws:lambda:"
                 + awsRegion + ":" + awsAccountId + ":function:" + functionName + "/invocations");
         integration.put("passthroughBehavior", "when_no_templates");
-        integration.put("httpMethod", "POST");
+        integration.put("httpMethod", method);
         integration.put("responses", responses);
         integration.put("type", "aws");
 
         operation.put("x-amazon-apigateway-integration", integration);
+
+        if (awsApiGatewayUseApiKey) {
+            Map<String, List<String>> apiKeySecurity = Collections.singletonMap("api_key", new ArrayList<>());
+
+            List<Object> security = (List<Object>) operation.get("security");
+            if (security == null) {
+                operation.put("security", Collections.singletonList(apiKeySecurity));
+            } else {
+                security.add(apiKeySecurity);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> createSuccessResponse(String httpStatusCode, Map<String, Object> apiResponse, String path, String method) throws IOException {
+    private Map<String, Object> createSuccessResponse(String httpStatusCode, Map<String, Object> apiResponse) throws IOException {
         Map<String, Object> awsResponse = new HashMap<>();
         awsResponse.put("responseTemplates", Collections.singletonMap("application/json", "$input.json('$.body')"));
         Map<String, Object> headers = (Map<String, Object>) apiResponse.get("headers");
