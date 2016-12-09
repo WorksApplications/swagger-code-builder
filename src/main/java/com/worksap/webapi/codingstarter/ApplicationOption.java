@@ -47,4 +47,7 @@ public class ApplicationOption {
 
     @Option(name = "--aws-api-gateway-use-api-key", usage = "Add x-api-key to swagger file")
     private boolean awsApiGatewayUseApiKey = false;
+
+    @Option(name = "--aws-api-gateway-enable-cors", usage = "Enable CORS to swagger file")
+    private boolean awsApiGatewayEnableCors = false;
 }

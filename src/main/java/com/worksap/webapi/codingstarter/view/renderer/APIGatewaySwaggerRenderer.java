@@ -18,6 +18,7 @@ package com.worksap.webapi.codingstarter.view.renderer;
 
 import com.worksap.webapi.codingstarter.ApplicationOption;
 import com.worksap.webapi.codingstarter.view.utils.Utils;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -33,18 +34,12 @@ import java.util.*;
  * TODO: Write Javadoc
  */
 public class APIGatewaySwaggerRenderer {
-    private static final Map<String, String> API_KEY_DEFINITION = new HashMap<>();
-
-    static {
-        API_KEY_DEFINITION.put("type", "apiKey");
-        API_KEY_DEFINITION.put("name", "x-api-key");
-        API_KEY_DEFINITION.put("in", "header");
-    }
 
     private final Yaml yaml;
     private final String awsRegion;
     private final String awsAccountId;
     private final boolean awsApiGatewayUseApiKey;
+    private final boolean awsApiGatewayEnableCors;
     private final String apiSpecPath;
     private final VelocityEngine velocityEngine;
     private final VelocityContext originalVelocityContext;
@@ -59,6 +54,7 @@ public class APIGatewaySwaggerRenderer {
         this.awsRegion = option.getAwsRegion();
         this.awsAccountId = option.getAwsAccountId();
         this.awsApiGatewayUseApiKey = option.isAwsApiGatewayUseApiKey();
+        this.awsApiGatewayEnableCors = option.isAwsApiGatewayEnableCors();
         this.apiSpecPath = option.getApiSpecPath();
         this.velocityEngine = velocityEngine;
         this.originalVelocityContext = velocityContext;
@@ -83,6 +79,14 @@ public class APIGatewaySwaggerRenderer {
                 String functionName = toFunctionName(method, path, (String) operation.get("operationId"));
                 addIntegration(functionName, operation, path, method);
             }
+
+            if (awsApiGatewayEnableCors) {
+                if (operations.containsKey("options")) {
+                    throw new IllegalStateException();
+                }
+
+                operations.put("options", generateCorsOptionsOperation());
+            }
         }
 
         if (awsApiGatewayUseApiKey) {
@@ -91,10 +95,58 @@ public class APIGatewaySwaggerRenderer {
                 securityDefinitions = new HashMap<>();
                 apiSpec.put("securityDefinitions", securityDefinitions);
             }
-            securityDefinitions.put("api_key", API_KEY_DEFINITION);
+            securityDefinitions.put("api_key", generateApiKeyDefinition());
         }
 
         return apiSpec;
+    }
+
+    private Map<String, Object> generateCorsOptionsOperation() {
+        Map<String, Object> corsOptionsOperation = new HashMap<>();
+
+        corsOptionsOperation.put("summary", "CORS support");
+
+        corsOptionsOperation.put("description", "Enable CORS by returning correct headers");
+
+        corsOptionsOperation.put("consumes", Collections.singletonList("application/json"));
+
+        corsOptionsOperation.put("produces", Collections.singletonList("application/json"));
+
+        corsOptionsOperation.put("tags", Collections.singletonList("CORS"));
+
+        Map<String, Object> integration = new HashMap<>();
+        integration.put("type", "mock");
+        integration.put("requestTemplates", Collections.singletonMap("application/json", "{\"statusCode\" : 200}"));
+        Map<String, Object> integrationResponse = new HashMap<>();
+        integrationResponse.put("statusCode", "200");
+        Map<String, Object> responseParameters = new HashMap<>();
+        responseParameters.put("method.response.header.Access-Control-Allow-Headers", "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'");
+        responseParameters.put("method.response.header.Access-Control-Allow-Methods", "'*'");
+        responseParameters.put("method.response.header.Access-Control-Allow-Origin", "'*'");
+        integrationResponse.put("responseParameters", responseParameters);
+        integrationResponse.put("responseTemplates", Collections.singletonMap("application/json", "{}"));
+        integration.put("responses", Collections.singletonMap("default", integrationResponse));
+
+        corsOptionsOperation.put("x-amazon-apigateway-integration", integration);
+
+        Map<String, Object> corsOptionsResponse = new HashMap<>();
+        corsOptionsResponse.put("description", "Default response for CORS method");
+        Map<String, Object> corsOptionsResponseHeaders = new HashMap<>();
+        corsOptionsResponseHeaders.put("Access-Control-Allow-Headers", Collections.singletonMap("type", "string"));
+        corsOptionsResponseHeaders.put("Access-Control-Allow-Methods", Collections.singletonMap("type", "string"));
+        corsOptionsResponseHeaders.put("Access-Control-Allow-Origin", Collections.singletonMap("type", "string"));
+        corsOptionsResponse.put("headers", corsOptionsResponseHeaders);
+        corsOptionsOperation.put("responses", Collections.singletonMap("200", corsOptionsResponse));
+
+        return corsOptionsOperation;
+    }
+
+    private Map<String, String> generateApiKeyDefinition() {
+        Map<String, String> apiKeyDefinition = new HashMap<>();
+        apiKeyDefinition.put("type", "apiKey");
+        apiKeyDefinition.put("name", "x-api-key");
+        apiKeyDefinition.put("in", "header");
+        return apiKeyDefinition;
     }
 
     private String toFunctionName(String method, String path, String operationId) {
