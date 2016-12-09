@@ -44,4 +44,7 @@ public class ApplicationOption {
 
     @Option(name = "--aws-account-id", usage = "AWS account ID to deploy")
     private String awsAccountId;
+
+    @Option(name = "--aws-api-gateway-use-api-key", usage = "Add x-api-key to swagger file")
+    private boolean awsApiGatewayUseApiKey = false;
 }
