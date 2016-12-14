@@ -32,7 +32,7 @@ public class ConflictException extends ApiException {
     }
 
     public ConflictException() {
-        super(DEFAULT_MESSAGE);
+        this(DEFAULT_MESSAGE);
     }
 
     @Override

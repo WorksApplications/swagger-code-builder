@@ -32,7 +32,7 @@ public class ForbiddenException extends ApiException {
     }
 
     public ForbiddenException() {
-        super(DEFAULT_MESSAGE);
+        this(DEFAULT_MESSAGE);
     }
 
     @Override
