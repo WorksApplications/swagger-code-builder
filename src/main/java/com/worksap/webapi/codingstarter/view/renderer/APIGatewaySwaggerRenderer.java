@@ -88,12 +88,12 @@ public class APIGatewaySwaggerRenderer {
             }
         }
 
+        Map<String, Object> parameters = (Map<String, Object>) apiSpec.get("parameters");
+        parameters.entrySet().removeIf(entry -> entry.getKey().startsWith("X-Forwarded-For"));
+
         if (awsApiGatewayUseApiKey) {
-            Map<String, Object> securityDefinitions = (Map<String, Object>) apiSpec.get("securityDefinitions");
-            if (securityDefinitions == null) {
-                securityDefinitions = new HashMap<>();
-                apiSpec.put("securityDefinitions", securityDefinitions);
-            }
+            Map<String, Object> securityDefinitions = (Map<String, Object>) apiSpec
+                    .computeIfAbsent("securityDefinitions", key -> new HashMap());
             securityDefinitions.put("api_key", generateApiKeyDefinition());
         }
 
@@ -173,6 +173,8 @@ public class APIGatewaySwaggerRenderer {
     private void processOperation(String functionName, Map<String, Object> operation, String path, String method) throws IOException {
         Map<String, String> requestTemplates = Collections.singletonMap("application/json", renderRequestMappingTemplate(path, method));
 
+        processParameters((List<Object>) operation.get("parameters"));
+
         Map<String, Object> responses = new HashMap<>();
         for (Map.Entry<String, Object> responseEntry : ((Map<String, Object>) operation.get("responses")).entrySet()) {
             String httpStatusCode = String.valueOf(responseEntry.getKey());
@@ -216,6 +218,20 @@ public class APIGatewaySwaggerRenderer {
                 operation.put("security", Collections.singletonList(apiKeySecurity));
             } else {
                 security.add(apiKeySecurity);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processParameters(List<Object> parameters) {
+        for (Iterator<Object> it = parameters.iterator(); it.hasNext();) {
+            Map<String, Object> parameter = (Map<String, Object>) it.next();
+            if ("X-Forwarded-For".equals(parameter.get("name")) && "header".equals(parameter.get("in"))) {
+                it.remove();
+            }
+            String ref = (String) parameter.get("$ref");
+            if (ref != null && ref.startsWith("#/parameters/X-Forwarded-For")) {
+                it.remove();
             }
         }
     }

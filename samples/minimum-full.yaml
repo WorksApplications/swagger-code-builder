@@ -12,9 +12,7 @@ paths:
         - name: Authorization
           in: header
           type: string
-        - name: X-Forwarded-For
-          in: header
-          type: string
+        - $ref: '#/parameters/X-Forwarded-For'
         - name: userId
           in: path
           type: string
@@ -35,3 +33,8 @@ paths:
                 type: string
               role:
                 type: string
+parameters:
+  X-Forwarded-For:
+    name: X-Forwarded-For
+    description: この API は、 IP アドレスによる匿名によるアクセスが可能です。
+    in: header
