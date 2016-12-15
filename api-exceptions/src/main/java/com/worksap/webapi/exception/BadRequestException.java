@@ -32,7 +32,7 @@ public class BadRequestException extends ApiException {
     }
 
     public BadRequestException() {
-        super(DEFAULT_MESSAGE);
+        this(DEFAULT_MESSAGE);
     }
 
     @Override

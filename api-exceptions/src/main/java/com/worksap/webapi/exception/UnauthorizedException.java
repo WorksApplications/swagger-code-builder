@@ -29,7 +29,7 @@ public class UnauthorizedException extends ApiException {
     }
 
     public UnauthorizedException() {
-        super(DEFAULT_MESSAGE);
+        this(DEFAULT_MESSAGE);
     }
 
     @Override

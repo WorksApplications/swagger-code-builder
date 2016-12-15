@@ -24,15 +24,15 @@ public class NotFoundException extends ApiException {
     private static final String DEFAULT_MESSAGE = "Not Found";
 
     public NotFoundException(String message, Throwable t) {
-            super(MESSAGE_PREFIX + message, t);
-        }
+        super(MESSAGE_PREFIX + message, t);
+    }
 
     public NotFoundException(String message) {
         super(MESSAGE_PREFIX + message);
     }
 
     public NotFoundException() {
-        super(DEFAULT_MESSAGE);
+        this(DEFAULT_MESSAGE);
     }
 
     @Override
