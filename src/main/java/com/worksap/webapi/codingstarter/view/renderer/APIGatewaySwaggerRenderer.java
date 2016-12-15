@@ -18,7 +18,6 @@ package com.worksap.webapi.codingstarter.view.renderer;
 
 import com.worksap.webapi.codingstarter.ApplicationOption;
 import com.worksap.webapi.codingstarter.view.utils.Utils;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -77,7 +76,7 @@ public class APIGatewaySwaggerRenderer {
                 String method = operationEntry.getKey().toUpperCase();
                 Map<String, Object> operation = (Map<String, Object>) operationEntry.getValue();
                 String functionName = toFunctionName(method, path, (String) operation.get("operationId"));
-                addIntegration(functionName, operation, path, method);
+                processOperation(functionName, operation, path, method);
             }
 
             if (awsApiGatewayEnableCors) {
@@ -171,7 +170,7 @@ public class APIGatewaySwaggerRenderer {
     }
 
     @SuppressWarnings("unchecked")
-    private void addIntegration(String functionName, Map<String, Object> operation, String path, String method) throws IOException {
+    private void processOperation(String functionName, Map<String, Object> operation, String path, String method) throws IOException {
         Map<String, String> requestTemplates = Collections.singletonMap("application/json", renderRequestMappingTemplate(path, method));
 
         Map<String, Object> responses = new HashMap<>();
@@ -203,7 +202,7 @@ public class APIGatewaySwaggerRenderer {
         integration.put("uri", "arn:aws:apigateway:" + awsRegion + ":lambda:path/2015-03-31/functions/arn:aws:lambda:"
                 + awsRegion + ":" + awsAccountId + ":function:" + functionName + "/invocations");
         integration.put("passthroughBehavior", "when_no_templates");
-        integration.put("httpMethod", method);
+        integration.put("httpMethod", "POST"); // Lambda must be called by POST
         integration.put("responses", responses);
         integration.put("type", "aws");
 
@@ -251,7 +250,8 @@ public class APIGatewaySwaggerRenderer {
 
     private Map<String, Object> createErrorResponse(String httpStatusCode, Map<String, Object> apiResponse) {
         Map<String, Object> awsResponse = new HashMap<>();
-        awsResponse.put("responseTemplates", Collections.singletonMap("application/json", "{\"message\": \"$input.body\"}"));
+        awsResponse.put("responseTemplates",Collections.singletonMap("application/json",
+                "{\"message\": \"$util.escapeJavaScript($input.path('$.errorMessage').substring(5))\"}"));
         awsResponse.put("statusCode", httpStatusCode);
 
         if (awsApiGatewayEnableCors) {
